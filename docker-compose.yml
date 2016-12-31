@@ -1,0 +1,20 @@
+version: '2'
+services:
+  jenkins:
+    image: jenkins:2.32.1
+    container_name: jenkins
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - ./jenkins_data:/var/jenkins_home
+  nginx_jenkins:
+    image: nginx:1.11.8
+    container_name: nginx_jenkins
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d/
+    links:
+      - jenkins
