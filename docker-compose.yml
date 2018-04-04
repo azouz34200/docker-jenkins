@@ -1,20 +1,41 @@
 version: '2'
 services:
   jenkins:
-    image: jenkins:2.32.1
+    build:
+      context: .
+      args:
+       jenkins_version: 2.107.1
     container_name: jenkins
     restart: always
     ports:
-      - 8080:8080
+      #- "8080:8080"
+      - "50000:50000"
     volumes:
       - ./jenkins_data:/var/jenkins_home
+    links:
+      - nexus
+    environment:
+      - JENKINS_JAVA_OPTIONS="-Djavax.net.ssl.keyStorePassword=changeit -Djavax.net.ssl.keyStore=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacert"
+  socat:
+    build: https://github.com/azouz34200/docker-socat.git
+    container_name: socat
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    links:
+    - jenkins
   nginx_jenkins:
     image: nginx:1.11.8
     container_name: nginx_jenkins
     restart: always
     ports:
-      - 80:80
+      - "80:80"
     volumes:
       - ./nginx/:/etc/nginx/conf.d/
     links:
       - jenkins
+  nexus:
+    image: sonatype/nexus3
+    ports:
+     - "8081:8081"
+    volumes:
+      - ./nexus-data:/nexus-data  
